@@ -17,6 +17,7 @@ class _HomeState extends State<Home> {
   List<String> email = [];
   List<String> phone = [];
   List<String> address = [];
+  List<String> site = [];
 
   bool isNumeric(String s) {
     if (s == null) {
@@ -32,6 +33,7 @@ class _HomeState extends State<Home> {
       email = [];
       phone = [];
       address = [];
+      site = [];
       _image = File(pickedFile.path);
       final FirebaseVisionImage visionImage =
           FirebaseVisionImage.fromFile(_image);
@@ -44,7 +46,8 @@ class _HomeState extends State<Home> {
 
       for (TextBlock block in visionText.blocks) {
         final Rect boundingBox = block.boundingBox;
-        print("boundingBox: " + boundingBox.toString());
+        print("boundingBox: " +
+            (boundingBox.size.width * boundingBox.size.height).toString());
         final List<Offset> cornerPoints = block.cornerPoints;
         print("cornerPoints: " + cornerPoints.toString());
         final String text = block.text;
@@ -62,10 +65,19 @@ class _HomeState extends State<Home> {
                 email.add(line.text);
               });
             }
-          } else if (isNumeric(line.text.replaceAll(' ', ''))) {
+          } else if (isNumeric(line.text.replaceAll(
+              // RegExp(r"\b(\w*tel\w*)|(\w*gsm\w*)\b|(\s)", caseSensitive: false),
+              ' ',
+              ''))) {
             if (phone != null) {
               setState(() {
                 phone.add(line.text);
+              });
+            }
+          } else if (line.text.contains("www")) {
+            if (site != null) {
+              setState(() {
+                site.add(line.text);
               });
             }
           } else {
@@ -81,9 +93,6 @@ class _HomeState extends State<Home> {
           }
         }
       }
-
-      print("email: " + email.toString());
-      print("phone: " + phone.toString());
     } else {
       print('No image selected.');
     }
@@ -91,24 +100,29 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      createRow("Email", email),
-      SizedBox(
-        height: 30,
-      ),
-      createRow("Telefon", phone),
-      SizedBox(
-        height: 30,
-      ),
-      createRow("Adres", address),
-      SizedBox(
-        height: 30,
-      ),
-      FloatingActionButton(
-        onPressed: getImage,
-        child: Icon(Icons.photo),
-      ),
-    ]);
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(children: [
+        createRow("Email", email),
+        SizedBox(
+          height: 30,
+        ),
+        createRow("Telefon", phone),
+        SizedBox(
+          height: 30,
+        ),
+        createRow("Adres", address),
+        SizedBox(
+          height: 30,
+        ),
+        createRow("Site", site),
+        Spacer(),
+        FloatingActionButton(
+          onPressed: getImage,
+          child: Icon(Icons.photo),
+        ),
+      ]),
+    );
   }
 
   Row createRow(String name, List<String> list) {
