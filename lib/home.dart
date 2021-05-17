@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -27,7 +30,7 @@ class _HomeState extends State<Home> {
   }
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       email = [];
@@ -44,17 +47,29 @@ class _HomeState extends State<Home> {
 
       print(visionText.text);
 
+      var requestData = [];
+
       for (TextBlock block in visionText.blocks) {
         final Rect boundingBox = block.boundingBox;
-        print("boundingBox: " +
-            (boundingBox.size.width * boundingBox.size.height).toString());
+        final String area =
+            (boundingBox.size.width * boundingBox.size.height).toString();
+        print("boundingBoxArea: " + area);
         final List<Offset> cornerPoints = block.cornerPoints;
         print("cornerPoints: " + cornerPoints.toString());
         final String text = block.text;
         print("text: " + text);
 
+        var ocrData = {
+          "text": text ?? "",
+          "boundingBoxArea": area ?? "",
+          "cornerPointsDx": cornerPoints[0].dx.toString() ?? "",
+          "cornerPointsDy": cornerPoints[0].dy.toString() ?? "",
+        };
+
+        requestData.add(ocrData);
         final List<RecognizedLanguage> languages = block.recognizedLanguages;
         // print("languages: " + languages.toString());
+        /*
 
         for (TextLine line in block.lines) {
           // Same getters as TextBlock
@@ -92,10 +107,22 @@ class _HomeState extends State<Home> {
             // print("element: " + element.toString());
           }
         }
+        */
       }
+      writeToCsv(requestData);
     } else {
       print('No image selected.');
     }
+  }
+
+  Future<http.Response> writeToCsv(List data) {
+    return http.post(
+      Uri.http("192.168.1.36:4444", "/api/dataset"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
   }
 
   @override
