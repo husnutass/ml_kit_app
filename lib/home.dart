@@ -6,6 +6,8 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:http/http.dart' as http;
+import 'package:contacts_service/contacts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -19,6 +21,8 @@ class _HomeState extends State<Home> {
   final picker = ImagePicker();
   List<String> email = [];
   List<String> phone = [];
+  List<String> mobilePhone = [];
+  List<String> businessPhone = [];
   List<String> address = [];
   List<String> site = [];
 
@@ -29,15 +33,15 @@ class _HomeState extends State<Home> {
     return double.tryParse(s) != null && s.length >= 10;
   }
 
-  String getWebSite(url) {
+  String getWebSite(String url) {
     RegExp regExp = new RegExp(
       r"[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)",
       caseSensitive: false,
       multiLine: false,
     );
 
-    print("hasMatch : " + regExp.hasMatch(url).toString());
-    print("stringMatch : " + regExp.stringMatch(url).toString());
+    // print("hasMatch : " + regExp.hasMatch(url).toString());
+    // print("stringMatch : " + regExp.stringMatch(url).toString());
 
     if (regExp.hasMatch(url)) {
       return regExp.stringMatch(url).toString();
@@ -45,15 +49,15 @@ class _HomeState extends State<Home> {
     return null;
   }
 
-  String getPhoneNumber(phone) {
+  String getPhoneNumber(String phone) {
     RegExp regExp = new RegExp(
       r"(([\+]90?)|([0]?))([ ]?)((\([0-9]{3}\))|([0-9]{3}))([ ]?)([0-9]{3})(\s*[\-]?)([0-9]{2})(\s*[\-]?)([0-9]{2})",
       caseSensitive: false,
       multiLine: false,
     );
 
-    print("hasMatch : " + regExp.hasMatch(phone).toString());
-    print("stringMatch : " + regExp.stringMatch(phone).toString());
+    // print("hasMatch : " + regExp.hasMatch(phone).toString());
+    // print("stringMatch : " + regExp.stringMatch(phone).toString());
 
     if (regExp.hasMatch(phone)) {
       return regExp.stringMatch(phone).toString();
@@ -61,8 +65,8 @@ class _HomeState extends State<Home> {
     return null;
   }
 
-  /// returns if the given phone number is mobile or business
-  String checkPhoneNumberType(phone) {
+  /// returns whether the given phone number is mobile or business
+  String checkPhoneNumberType(String phone) {
     if (phone[0] == "0") {
       if (phone[1] == "(") {
         if (phone[2] == "5") {
@@ -102,6 +106,8 @@ class _HomeState extends State<Home> {
     if (pickedFile != null) {
       email = [];
       phone = [];
+      mobilePhone = [];
+      businessPhone = [];
       address = [];
       site = [];
       _image = File(pickedFile.path);
@@ -152,11 +158,12 @@ class _HomeState extends State<Home> {
               });
             }
           } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
-            if (phone != null) {
-              setState(() {
-                phone.add(getPhoneNumber(line.text.replaceAll(' ', '')));
-              });
-            }
+            var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
+            if (checkPhoneNumberType(phoneNumber) == "mobile")
+              mobilePhone.add(phoneNumber);
+            else if (checkPhoneNumberType(phoneNumber) == "business")
+              businessPhone.add(phoneNumber);
+            phone.add(phoneNumber);
           } else if (getWebSite(line.text) != null) {
             if (site != null) {
               setState(() {
@@ -170,6 +177,7 @@ class _HomeState extends State<Home> {
               });
             }
           }
+
           final String lineArea =
               (line.boundingBox.size.width * line.boundingBox.size.height)
                   .toString();
@@ -199,11 +207,56 @@ class _HomeState extends State<Home> {
           // }
         }
       }
+      addContact();
       // writeToCsv(requestData);
-      print("blockData: " + requestData.toString());
-      print("lineData: " + requestData2.toString());
+      // print("blockData: " + requestData.toString());
+      // print("lineData: " + requestData2.toString());
     } else {
       print('No image selected.');
+    }
+  }
+
+  addContact() async {
+    PermissionStatus permission = await Permission.contacts.status;
+    if (permission != PermissionStatus.granted) {
+      await Permission.contacts.request();
+      PermissionStatus permission = await Permission.contacts.status;
+
+      if (permission == PermissionStatus.granted) {
+        if (await isAddedContact()) {
+          print("added contact");
+        }
+      }
+    } else {
+      if (await isAddedContact()) {
+        print("added contact");
+      }
+    }
+  }
+
+  List<Item> getItemFromList(
+      {@required String label, @required List<String> list}) {
+    List<Item> items = [];
+    list.forEach((element) {
+      items.add(Item(label: "mobile", value: element));
+    });
+    return items;
+  }
+
+  Future<bool> isAddedContact() async {
+    try {
+      print("adding contact...");
+      Contact contact = Contact();
+      contact.givenName = "name3";
+      // contact.company = "company";
+      contact.phones = getItemFromList(label: "mobile", list: phone);
+      contact.emails = getItemFromList(label: "email", list: email);
+      print(contact.toMap());
+      await ContactsService.addContact(contact);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 
@@ -226,7 +279,11 @@ class _HomeState extends State<Home> {
         SizedBox(
           height: 30,
         ),
-        createRow("Telefon", phone),
+        createRow("Cep Telefonu", mobilePhone),
+        SizedBox(
+          height: 30,
+        ),
+        createRow("İş Telefonu", businessPhone),
         SizedBox(
           height: 30,
         ),
