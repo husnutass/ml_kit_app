@@ -249,8 +249,10 @@ class _HomeState extends State<Home> {
       Contact contact = Contact();
       contact.givenName = "name3";
       // contact.company = "company";
-      contact.phones = getItemFromList(label: "mobile", list: phone);
-      contact.emails = getItemFromList(label: "email", list: email);
+      if (phone.length > 0)
+        contact.phones = getItemFromList(label: "mobile", list: phone);
+      if (email.length > 0)
+        contact.emails = getItemFromList(label: "email", list: email);
       print(contact.toMap());
       await ContactsService.addContact(contact);
       return true;
