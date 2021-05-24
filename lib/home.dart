@@ -200,6 +200,7 @@ class _HomeState extends State<Home> {
         }
       }
       // writeToCsv(requestData);
+      getName(visionText);
       print("blockData: " + requestData.toString());
       print("lineData: " + requestData2.toString());
     } else {
@@ -207,9 +208,35 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<http.Response> getName(VisionText visionText) {
+    var requestData = [];
+
+    for (TextBlock block in visionText.blocks) {
+      for (TextLine line in block.lines) {
+        final String lineArea =
+            (line.boundingBox.size.width * line.boundingBox.size.height)
+                .toString();
+        var ocrData = {
+          "text": line.text ?? "",
+          "boundingBoxArea": lineArea ?? "",
+          "cornerPointsDx": line.cornerPoints[0]?.dx.toString() ?? "",
+          "cornerPointsDy": line.cornerPoints[0]?.dy.toString() ?? "",
+        };
+        requestData.add(ocrData);
+      }
+    }
+    return http.post(
+      Uri.http("192.168.1.35:4444", "/api/findName"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(requestData),
+    );
+  }
+
   Future<http.Response> writeToCsv(List data) {
     return http.post(
-      Uri.http("192.168.1.5:4444", "/api/dataset"),
+      Uri.http("192.168.1.35:4444", "/api/dataset"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
