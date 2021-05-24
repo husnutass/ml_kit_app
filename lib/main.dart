@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:ml_kit_app/home.dart';
+import 'package:ml_kit_app/homescreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,16 +19,12 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Material App',
       home: FutureBuilder(
         future: _firebaseApp,
         builder: (context, snapshot) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('ML'),
-            ),
-            body: appBody(snapshot),
-          );
+          return HomeScreen();
         },
       ),
     );
