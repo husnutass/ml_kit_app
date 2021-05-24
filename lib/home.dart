@@ -25,6 +25,7 @@ class _HomeState extends State<Home> {
   List<String> businessPhone = [];
   List<String> address = [];
   List<String> site = [];
+  List<String> personName = [];
 
   bool isNumeric(String s) {
     if (s == null) {
@@ -55,9 +56,6 @@ class _HomeState extends State<Home> {
       caseSensitive: false,
       multiLine: false,
     );
-
-    // print("hasMatch : " + regExp.hasMatch(phone).toString());
-    // print("stringMatch : " + regExp.stringMatch(phone).toString());
 
     if (regExp.hasMatch(phone)) {
       return regExp.stringMatch(phone).toString();
@@ -110,47 +108,18 @@ class _HomeState extends State<Home> {
       businessPhone = [];
       address = [];
       site = [];
+      personName = [];
       _image = File(pickedFile.path);
+
       final FirebaseVisionImage visionImage =
           FirebaseVisionImage.fromFile(_image);
       final TextRecognizer textRecognizer =
           FirebaseVision.instance.textRecognizer();
-      // final TextRecognizer cloudTextRecognizer = FirebaseVision.instance
-      //     .cloudTextRecognizer(CloudTextRecognizerOptions(
-      //         textModelType: CloudTextModelType.dense,
-      //         hintedLanguages: ["tr"]));
       final VisionText visionText =
           await textRecognizer.processImage(visionImage);
 
-      // print(visionText.text);
-
-      var requestData = [];
-      var requestData2 = [];
-
       for (TextBlock block in visionText.blocks) {
-        final Rect boundingBox = block.boundingBox;
-        final String area =
-            (boundingBox.size.width * boundingBox.size.height).toString();
-        // print("boundingBoxArea: " + area);
-        final List<Offset> cornerPoints = block.cornerPoints;
-        // print("cornerPoints: " + cornerPoints.toString());
-        final String text = block.text;
-        // print("text: " + text);
-
-        var ocrData = {
-          "text": text ?? "",
-          "boundingBoxArea": area ?? "",
-          "cornerPointsDx": cornerPoints[0].dx.toString() ?? "",
-          "cornerPointsDy": cornerPoints[0].dy.toString() ?? "",
-        };
-
-        requestData.add(ocrData);
-        // final List<RecognizedLanguage> languages = block.recognizedLanguages;
-        // print("languages: " + languages.toString());
-
         for (TextLine line in block.lines) {
-          // Same getters as TextBlock
-          // print("line: " + line.text);
           if (EmailValidator.validate(line.text)) {
             if (email != null) {
               setState(() {
@@ -177,31 +146,16 @@ class _HomeState extends State<Home> {
               });
             }
           }
-
-          final String lineArea =
-              (line.boundingBox.size.width * line.boundingBox.size.height)
-                  .toString();
-          var ocrData = {
-            "text": line.text ?? "",
-            "boundingBoxArea": lineArea ?? "",
-            "cornerPointsDx": line.cornerPoints[0]?.dx.toString() ?? "",
-            "cornerPointsDy": line.cornerPoints[0]?.dy.toString() ?? "",
-          };
-
-          requestData2.add(ocrData);
         }
       }
-      addContact();
-      // writeToCsv(requestData);
-      getName(visionText);
-      print("blockData: " + requestData.toString());
-      print("lineData: " + requestData2.toString());
+      getName(visionText).then((value) => null);
+      // addContact();
     } else {
       print('No image selected.');
     }
   }
 
-  Future<http.Response> getName(VisionText visionText) {
+  Future<http.Response> getName(VisionText visionText) async {
     var requestData = [];
 
     for (TextBlock block in visionText.blocks) {
@@ -218,13 +172,20 @@ class _HomeState extends State<Home> {
         requestData.add(ocrData);
       }
     }
-    return http.post(
+
+    final response = await http.post(
       Uri.http("192.168.1.35:4444", "/api/findName"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(requestData),
     );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        personName.add(jsonDecode(response.body)['text']);
+      });
+    }
   }
 
   addContact() async {
@@ -273,16 +234,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Future<http.Response> writeToCsv(List data) {
-    return http.post(
-      Uri.http("192.168.1.35:4444", "/api/dataset"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(data),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -305,6 +256,10 @@ class _HomeState extends State<Home> {
           height: 30,
         ),
         createRow("Site", site),
+        SizedBox(
+          height: 30,
+        ),
+        createRow("Kişi İsmi", personName),
         Spacer(),
         FloatingActionButton(
           onPressed: getImage,

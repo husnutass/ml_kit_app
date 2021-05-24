@@ -145,22 +145,27 @@ app.post('/api/findName', function (request, response) {
   var ocrData = request.body;
   console.log(ocrData);
 
-  let foundName = '';
+  let foundName = {};
   for (const item of ocrData) {
     let seperatedText = item.text.split(" ");
     for (const word of seperatedText) {
       console.log(word);
       if (names.includes(word)) {
         console.log("kelime:" + word);
-        foundName = word;
+        foundName = item;
         break;
       }
     }
-    if (foundName) {
+    if (Object.keys(foundName).length != 0) {
       break;
     }
   }
   // matchedItems.sort((a, b) => (a.cornerPointsDy > b.cornerPointsDy) ? 1 : -1);
-  console.log('foundName: ' + foundName);
-  response.status(200).send({ message: foundName });
+  if (Object.keys(foundName).length != 0) {
+    console.log('foundName: ', foundName);
+    response.status(200).send(foundName);
+  } else {
+    console.log('isim bulunamadi');
+    response.status(400).send();
+  }
 });
