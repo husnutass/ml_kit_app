@@ -91,7 +91,7 @@ let names = [];
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.listen(4444, function () {
+app.listen(process.env.PORT || 4444, function () {
   console.log("Port dinleniyor 4444...");
 });
 
