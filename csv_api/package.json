@@ -2,5 +2,19 @@
   "dependencies": {
     "express": "^4.17.1",
     "objects-to-csv": "^1.3.6"
+  },
+  "name": "csv_api",
+  "version": "1.0.0",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Samed Bicer",
+  "license": "MIT",
+  "description": "A Node.js based express.js http api server",
+  "engines": {
+    "node": "12.13.1"
   }
 }
