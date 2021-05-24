@@ -174,7 +174,7 @@ class _HomeState extends State<Home> {
     }
 
     final response = await http.post(
-      Uri.http("192.168.1.35:4444", "/api/findName"),
+      Uri.http("iu-bitirme-app.herokuapp.com", "/api/findName"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
