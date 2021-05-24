@@ -113,7 +113,7 @@ fs.readFile('isimler.txt', 'utf8', (err, data) => {
   }
   const splittedNames = data.split("\n");
   splittedNames.forEach(name => {
-    names.push(name);
+    names.push(name.toLowerCase());
   });
 });
 
@@ -126,7 +126,7 @@ app.get('/api/cities', function (request, response) {
     let seperatedText = item.text.split(" ");
     for (const word of seperatedText) {
       console.log(word);
-      if (names.includes(word)) {
+      if (names.includes(word.toLowerCase())) {
         console.log("kelime:" + word);
         foundName = word;
         break;
@@ -150,7 +150,7 @@ app.post('/api/findName', function (request, response) {
     let seperatedText = item.text.split(" ");
     for (const word of seperatedText) {
       console.log(word);
-      if (names.includes(word)) {
+      if (names.includes(word.toLowerCase())) {
         console.log("kelime:" + word);
         foundName = item;
         break;
