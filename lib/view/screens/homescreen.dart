@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:ml_kit_app/utils/functions.dart';
+import 'package:ml_kit_app/view/components/filled_button.dart';
+import 'package:ml_kit_app/view/components/transparent_button.dart';
+import 'package:ml_kit_app/view/screens/input_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -85,48 +90,21 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {},
-            child: Text(
-              "Camera",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 17, horizontal: 10),
-              primary: Color(0xFFFFE500),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
+          child: FilledButton(
+            text: "Kamera",
+            func: () {
+              getImage(ImageSource.camera, context);
+            },
           ),
         ),
         SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () {},
-            child: Text(
-              "Gallery",
-              style: TextStyle(
-                color: Color(0xFFFFE500),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 17, horizontal: 10),
-              primary: Color(0xFFFFE500),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              side: BorderSide(
-                color: Color(0xFFFFE500),
-              ),
-            ),
+          child: TransparentButton(
+            text: "Galeri",
+            func: () {
+              getImage(ImageSource.gallery, context);
+            },
           ),
         ),
       ],

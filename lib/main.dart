@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:ml_kit_app/home.dart';
-import 'package:ml_kit_app/homescreen.dart';
+import 'package:ml_kit_app/view/screens/homescreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +20,9 @@ class _AppState extends State<App> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Material App',
+      theme: ThemeData(
+        canvasColor: Colors.transparent,
+      ),
       home: FutureBuilder(
         future: _firebaseApp,
         builder: (context, snapshot) {
@@ -37,7 +39,7 @@ class _AppState extends State<App> {
         child: Text("ERROR"),
       );
     } else if (snapshot.hasData) {
-      return Home();
+      return HomeScreen();
     } else {
       return Center(
         child: CircularProgressIndicator(),
