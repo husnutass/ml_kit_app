@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ml_kit_app/utils/variables.dart';
@@ -110,7 +110,7 @@ Future<bool> isAddedContact() async {
   }
 }
 
-addContact() async {
+addContact(BuildContext context) async {
   PermissionStatus permission = await Permission.contacts.status;
   if (permission != PermissionStatus.granted) {
     print("get perm");
@@ -120,11 +120,13 @@ addContact() async {
     if (permission == PermissionStatus.granted) {
       if (await isAddedContact()) {
         print("added contact");
+        Navigator.pop(context);
       }
     }
   } else {
     if (await isAddedContact()) {
       print("added contact");
+      Navigator.pop(context);
     }
   }
 }
@@ -143,59 +145,65 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
     address = [];
     site = [];
     personName = [];
-    _image = File(pickedFile.path);
 
-    final FirebaseVisionImage visionImage =
-        FirebaseVisionImage.fromFile(_image);
-    final TextRecognizer textRecognizer =
-        FirebaseVision.instance.textRecognizer();
-    final VisionText visionText =
-        await textRecognizer.processImage(visionImage);
+    // _image = File(pickedFile.path);
 
-    for (TextBlock block in visionText.blocks) {
-      for (TextLine line in block.lines) {
-        if (EmailValidator.validate(line.text)) {
+    final inputImage = InputImage.fromFile(File(pickedFile.path));
+
+    final textDetector = GoogleMlKit.vision.textDetector();
+    final recognisedText = await textDetector.processImage(inputImage);
+
+    // final FirebaseVisionImage visionImage =
+    //     FirebaseVisionImage.fromFile(_image);
+    // final TextRecognizer textRecognizer =
+    //     FirebaseVision.instance.textRecognizer();
+    // final VisionText visionText =
+    //     await textRecognizer.processImage(visionImage);
+
+    for (TextBlock block in recognisedText.textBlocks) {
+      for (TextLine line in block.textLines) {
+        if (EmailValidator.validate(line.lineText)) {
           if (email != null) {
-            email.add(line.text);
+            email.add(line.lineText);
           }
-        } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
-          var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
+        } else if (getPhoneNumber(line.lineText.replaceAll(' ', '')) != null) {
+          var phoneNumber = getPhoneNumber(line.lineText.replaceAll(' ', ''));
           if (checkPhoneNumberType(phoneNumber) == "mobile")
             mobilePhone.add(phoneNumber);
           else if (checkPhoneNumberType(phoneNumber) == "business")
             businessPhone.add(phoneNumber);
           phone.add(phoneNumber);
-        } else if (getWebSite(line.text) != null) {
+        } else if (getWebSite(line.lineText) != null) {
           if (site != null) {
-            site.add(getWebSite(line.text));
+            site.add(getWebSite(line.lineText));
           }
         } else {
           if (address != null) {
-            address.add(line.text);
+            address.add(line.lineText);
           }
         }
       }
     }
-    getName(visionText).then((value) => InputDrawer(context).openInputDrawer());
+    getName(recognisedText)
+        .then((value) => InputDrawer(context).openInputDrawer());
     // addContact();
   } else {
     print('No image selected.');
   }
 }
 
-Future<http.Response> getName(VisionText visionText) async {
+Future<http.Response> getName(RecognisedText recognisedText) async {
   var requestData = [];
 
-  for (TextBlock block in visionText.blocks) {
-    for (TextLine line in block.lines) {
+  for (TextBlock block in recognisedText.textBlocks) {
+    for (TextLine line in block.textLines) {
       final String lineArea =
-          (line.boundingBox.size.width * line.boundingBox.size.height)
-              .toString();
+          (line.lineRect.size.width * line.lineRect.size.height).toString();
       var ocrData = {
-        "text": line.text ?? "",
+        "text": line.lineText ?? "",
         "boundingBoxArea": lineArea ?? "",
-        "cornerPointsDx": line.cornerPoints[0]?.dx.toString() ?? "",
-        "cornerPointsDy": line.cornerPoints[0]?.dy.toString() ?? "",
+        "cornerPointsDx": line.linePoints[0]?.dx.toString() ?? "",
+        "cornerPointsDy": line.linePoints[0]?.dy.toString() ?? "",
       };
       requestData.add(ocrData);
     }

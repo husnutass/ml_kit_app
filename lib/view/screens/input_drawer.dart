@@ -19,12 +19,12 @@ class InputDrawer {
     var phoneController2 = TextEditingController();
     var phoneController3 = TextEditingController();
 
-    nameController.text = personName[0];
-    emailController1.text = email[0];
-    // emailController2.text = email[1];
-    phoneController1.text = phone[0];
-    phoneController2.text = phone[1];
-    // phoneController3.text = phone[2];
+    if (personName.asMap().containsKey(0)) nameController.text = personName[0];
+    if (phone.asMap().containsKey(0)) phoneController1.text = phone[0];
+    if (phone.asMap().containsKey(1)) phoneController2.text = phone[1];
+    if (phone.asMap().containsKey(2)) phoneController3.text = phone[2];
+    if (email.asMap().containsKey(0)) emailController1.text = email[0];
+    if (email.asMap().containsKey(1)) emailController2.text = email[1];
 
     final inputData = [
       {
@@ -32,24 +32,24 @@ class InputDrawer {
         "label": "İsim",
       },
       {
-        "controller": emailController1,
-        "label": "Mail",
-      },
-      {
-        "controller": emailController2,
-        "label": "Mail-2",
-      },
-      {
         "controller": phoneController1,
         "label": "Telefon",
       },
       {
         "controller": phoneController2,
-        "label": "Telefon-2",
+        "label": "Telefon 2",
       },
       {
         "controller": phoneController3,
-        "label": "Telefon-3",
+        "label": "Telefon 3",
+      },
+      {
+        "controller": emailController1,
+        "label": "Mail",
+      },
+      {
+        "controller": emailController2,
+        "label": "Mail 2",
       },
     ];
 
@@ -123,7 +123,11 @@ class InputDrawer {
                 Spacer(),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton(text: "Rehbere Kaydet", func: addContact),
+                  child: FilledButton(
+                      text: "Rehbere Kaydet",
+                      func: () {
+                        addContact(context);
+                      }),
                 ),
                 SizedBox(height: 20),
                 SizedBox(
