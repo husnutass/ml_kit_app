@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ml_kit_app/utils/functions.dart';
 import 'package:ml_kit_app/view/components/filled_button.dart';
 import 'package:ml_kit_app/view/components/transparent_button.dart';
-import 'package:ml_kit_app/view/screens/input_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
