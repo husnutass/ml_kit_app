@@ -25,9 +25,6 @@ String getWebSite(String url) {
     multiLine: false,
   );
 
-  // print("hasMatch : " + regExp.hasMatch(url).toString());
-  // print("stringMatch : " + regExp.stringMatch(url).toString());
-
   if (regExp.hasMatch(url)) {
     return regExp.stringMatch(url).toString();
   }
@@ -146,19 +143,10 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
     site = [];
     personName = [];
 
-    // _image = File(pickedFile.path);
-
     final inputImage = InputImage.fromFile(File(pickedFile.path));
 
     final textDetector = GoogleMlKit.vision.textDetector();
     final recognisedText = await textDetector.processImage(inputImage);
-
-    // final FirebaseVisionImage visionImage =
-    //     FirebaseVisionImage.fromFile(_image);
-    // final TextRecognizer textRecognizer =
-    //     FirebaseVision.instance.textRecognizer();
-    // final VisionText visionText =
-    //     await textRecognizer.processImage(visionImage);
 
     for (TextBlock block in recognisedText.textBlocks) {
       for (TextLine line in block.textLines) {

@@ -8,16 +8,23 @@ class InputDrawer {
   BuildContext context;
   InputDrawer(this.context);
 
+  TextEditingController nameController;
+  TextEditingController emailController1;
+  TextEditingController emailController2;
+  TextEditingController phoneController1;
+  TextEditingController phoneController2;
+  TextEditingController phoneController3;
+
   openInputDrawer() {
     final double pageWidth = MediaQuery.of(context).size.width;
     final double pageHeight = MediaQuery.of(context).size.height;
 
-    var nameController = TextEditingController();
-    var emailController1 = TextEditingController();
-    var emailController2 = TextEditingController();
-    var phoneController1 = TextEditingController();
-    var phoneController2 = TextEditingController();
-    var phoneController3 = TextEditingController();
+    nameController = TextEditingController();
+    emailController1 = TextEditingController();
+    emailController2 = TextEditingController();
+    phoneController1 = TextEditingController();
+    phoneController2 = TextEditingController();
+    phoneController3 = TextEditingController();
 
     if (personName.asMap().containsKey(0)) nameController.text = personName[0];
     if (phone.asMap().containsKey(0)) phoneController1.text = phone[0];
@@ -25,6 +32,8 @@ class InputDrawer {
     if (phone.asMap().containsKey(2)) phoneController3.text = phone[2];
     if (email.asMap().containsKey(0)) emailController1.text = email[0];
     if (email.asMap().containsKey(1)) emailController2.text = email[1];
+
+    addListenersToControllers();
 
     final inputData = [
       {
@@ -90,7 +99,7 @@ class InputDrawer {
                   height: pageHeight * 0.36,
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: 6,
+                    itemCount: inputData.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         // height: 40,
@@ -145,5 +154,55 @@ class InputDrawer {
         );
       },
     );
+  }
+
+  void addListenersToControllers() {
+    nameController.addListener(() {
+      if (personName.length == 0) {
+        personName.add(nameController.text);
+      } else {
+        personName[0] = nameController.text;
+      }
+    });
+
+    phoneController1.addListener(() {
+      if (phone.length == 0) {
+        phone.add(phoneController1.text);
+      } else {
+        phone[0] = phoneController1.text;
+      }
+    });
+
+    phoneController2.addListener(() {
+      if (phone.length == 1) {
+        phone.add(phoneController2.text);
+      } else {
+        phone[1] = phoneController2.text;
+      }
+    });
+
+    phoneController3.addListener(() {
+      if (phone.length == 2) {
+        phone.add(phoneController3.text);
+      } else {
+        phone[2] = phoneController3.text;
+      }
+    });
+
+    emailController1.addListener(() {
+      if (email.length == 0) {
+        email.add(emailController1.text);
+      } else {
+        email[0] = emailController1.text;
+      }
+    });
+
+    emailController2.addListener(() {
+      if (email.length == 1) {
+        email.add(emailController2.text);
+      } else {
+        email[1] = emailController2.text;
+      }
+    });
   }
 }
