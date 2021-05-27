@@ -95,41 +95,44 @@ class InputDrawer {
                     ),
                   ),
                 ),
-                Container(
-                  height: pageHeight * 0.36,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: inputData.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        // height: 40,
-                        margin: EdgeInsets.symmetric(vertical: 6.0),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: TextFormField(
-                          style: TextStyle(
-                            color: Color(0xFFDDDDDD),
+                Expanded(
+                  child: Container(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: inputData.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          // height: 40,
+                          margin: EdgeInsets.symmetric(vertical: 6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelStyle: TextStyle(
-                              color: Color(0xFFFFE500),
+                          child: TextFormField(
+                            style: TextStyle(
+                              color: Color(0xFFDDDDDD),
                             ),
-                            labelText: inputData[index]["label"],
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 12.0,
-                              horizontal: 20.0,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelStyle: TextStyle(
+                                color: Color(0xFFFFE500),
+                              ),
+                              labelText: inputData[index]["label"],
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12.0,
+                                horizontal: 20.0,
+                              ),
                             ),
+                            controller: inputData[index]["controller"],
                           ),
-                          controller: inputData[index]["controller"],
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
-                Spacer(),
+                SizedBox(
+                  height: 20,
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
