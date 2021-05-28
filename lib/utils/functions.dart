@@ -131,6 +131,26 @@ addContact(BuildContext context) async {
   }
 }
 
+dummyTest() async {
+  String dummyText = '''Ziraat Bankasi 
+    Üsnah Bulgurcu
+    Anadolu Universitesi Subesi
+    Yesiltepe Mahallesi ismetinönü-2
+    Caddesi No: 2/31 PK 26470 Tepebașı,
+    Sube Yöneticisi
+    Eskisehir''';
+
+  final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+  final String language = await languageIdentifier.identifyLanguage(dummyText);
+  print(language);
+  final entityExtractor = GoogleMlKit.nlp.entityExtractor(language);
+
+  final List<EntityAnnotation> entities =
+      await entityExtractor.extractEntities(dummyText);
+
+  print("lang: $language, ext: $entities");
+}
+
 Future getImage(ImageSource imgSource, BuildContext context) async {
   File _image;
   final picker = ImagePicker();
@@ -152,36 +172,36 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
     final recognisedText = await textDetector.processImage(inputImage);
 
     // nl
-    final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
-    final String response =
-        await languageIdentifier.identifyLanguage(recognisedText.text);
-    final entityExtractor = GoogleMlKit.nlp.entityExtractor(response);
-    // final entityModelManager = GoogleMlKit.nlp.entityModelManager();
-    final List<EntityAnnotation> entities =
-        await entityExtractor.extractEntities(recognisedText.text);
+    // final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+    // final String response =
+    //     await languageIdentifier.identifyLanguage(recognisedText.text);
+    // final entityExtractor = GoogleMlKit.nlp.entityExtractor(response);
+    // // final entityModelManager = GoogleMlKit.nlp.entityModelManager();
+    // final List<EntityAnnotation> entities =
+    //     await entityExtractor.extractEntities(recognisedText.text);
 
-    print("lang: $response, ext: $entities");
+    // print("lang: $response, ext: $entities");
 
-    for (TextBlock block in recognisedText.textBlocks) {
-      for (TextLine line in block.textLines) {
-        if (EmailValidator.validate(line.lineText)) {
+    for (TextBlock block in recognisedText.blocks) {
+      for (TextLine line in block.lines) {
+        if (EmailValidator.validate(line.text)) {
           if (email != null) {
-            email.add(line.lineText);
+            email.add(line.text);
           }
-        } else if (getPhoneNumber(line.lineText.replaceAll(' ', '')) != null) {
-          var phoneNumber = getPhoneNumber(line.lineText.replaceAll(' ', ''));
+        } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
+          var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
           if (checkPhoneNumberType(phoneNumber) == "mobile")
             mobilePhone.add(phoneNumber);
           else if (checkPhoneNumberType(phoneNumber) == "business")
             businessPhone.add(phoneNumber);
           phone.add(phoneNumber);
-        } else if (getWebSite(line.lineText) != null) {
+        } else if (getWebSite(line.text) != null) {
           if (site != null) {
-            site.add(getWebSite(line.lineText));
+            site.add(getWebSite(line.text));
           }
         } else {
           if (address != null) {
-            address.add(line.lineText);
+            address.add(line.text);
           }
         }
       }
@@ -197,15 +217,15 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
 Future<http.Response> getName(RecognisedText recognisedText) async {
   var requestData = [];
 
-  for (TextBlock block in recognisedText.textBlocks) {
-    for (TextLine line in block.textLines) {
+  for (TextBlock block in recognisedText.blocks) {
+    for (TextLine line in block.lines) {
       final String lineArea =
-          (line.lineRect.size.width * line.lineRect.size.height).toString();
+          (line.rect.size.width * line.rect.height).toString();
       var ocrData = {
-        "text": line.lineText ?? "",
+        "text": line.text ?? "",
         "boundingBoxArea": lineArea ?? "",
-        "cornerPointsDx": line.linePoints[0]?.dx.toString() ?? "",
-        "cornerPointsDy": line.linePoints[0]?.dy.toString() ?? "",
+        "cornerPointsDx": line.cornerPoints[0]?.dx.toString() ?? "",
+        "cornerPointsDy": line.cornerPoints[0]?.dy.toString() ?? "",
       };
       requestData.add(ocrData);
     }

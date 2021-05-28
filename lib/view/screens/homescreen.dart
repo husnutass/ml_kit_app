@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FilledButton(
             text: "Kamera",
             func: () {
-              getImage(ImageSource.camera, context);
+              dummyTest();
             },
           ),
         ),
