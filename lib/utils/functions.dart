@@ -7,6 +7,7 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ml_kit_app/utils/variables.dart';
+import 'package:ml_kit_app/view/components/custom_dialog.dart';
 import 'package:ml_kit_app/view/screens/input_drawer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
@@ -118,12 +119,14 @@ addContact(BuildContext context) async {
       if (await isAddedContact()) {
         print("added contact");
         Navigator.pop(context);
+        _showDialog(context);
       }
     }
   } else {
     if (await isAddedContact()) {
       print("added contact");
       Navigator.pop(context);
+      _showDialog(context);
     }
   }
 }
@@ -208,4 +211,18 @@ Future<http.Response> getName(RecognisedText recognisedText) async {
   if (response.statusCode == 200) {
     personName.add(jsonDecode(response.body)['text']);
   }
+}
+
+Future _showDialog(BuildContext context) async {
+  var data = await showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      Future.delayed(Duration(milliseconds: 2400), () {
+        Navigator.of(context).pop();
+      });
+      return CustomDialog();
+    },
+  );
+  return data;
 }
