@@ -33,7 +33,7 @@ flutter:
 
   assets:
     - assets/icons/
-
+    - assets/animations/
   # fonts:
   #   - family: Schyler
   #     fonts:
