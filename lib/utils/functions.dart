@@ -140,9 +140,20 @@ dummyTest() async {
     Sube Yöneticisi
     Eskisehir''';
 
+  final entityModelManager = GoogleMlKit.nlp.entityModelManager();
+
   final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
   final String language = await languageIdentifier.identifyLanguage(dummyText);
   print(language);
+
+  final List<String> availableModels =
+      await entityModelManager.getAvailableModels();
+  print(availableModels.length);
+
+  // final String model = await entityModelManager.downloadModel();
+  // final bool isModel =
+  //     await entityModelManager.isModelDownloaded();
+  // print(isModel);
   final entityExtractor = GoogleMlKit.nlp.entityExtractor(language);
 
   final List<EntityAnnotation> entities =
