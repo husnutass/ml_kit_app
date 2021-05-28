@@ -151,6 +151,17 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
     final textDetector = GoogleMlKit.vision.textDetector();
     final recognisedText = await textDetector.processImage(inputImage);
 
+    // nl
+    final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+    final String response =
+        await languageIdentifier.identifyLanguage(recognisedText.text);
+    final entityExtractor = GoogleMlKit.nlp.entityExtractor(response);
+    // final entityModelManager = GoogleMlKit.nlp.entityModelManager();
+    final List<EntityAnnotation> entities =
+        await entityExtractor.extractEntities(recognisedText.text);
+
+    print("lang: $response, ext: $entities");
+
     for (TextBlock block in recognisedText.textBlocks) {
       for (TextLine line in block.textLines) {
         if (EmailValidator.validate(line.lineText)) {
