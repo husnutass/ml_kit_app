@@ -131,39 +131,41 @@ addContact(BuildContext context) async {
   }
 }
 
-dummyTest() async {
-  String dummyText = '''Ziraat Bankasi 
-    Üsnah Bulgurcu
-    Anadolu Universitesi Subesi
-    Yesiltepe Mahallesi ismetinönü-2
-    Caddesi No: 2/31 PK 26470 Tepebașı,
-    Sube Yöneticisi
-    Eskisehir''';
-
+Future<List<EntityAnnotation>> extractEntities(String text) async {
   final entityModelManager = GoogleMlKit.nlp.entityModelManager();
 
   final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
-  final String language = await languageIdentifier.identifyLanguage(dummyText);
+  final String language = await languageIdentifier.identifyLanguage(text);
   print(language);
 
-  final List<String> availableModels =
-      await entityModelManager.getAvailableModels();
-  print(availableModels.length);
+  final bool isModel = await entityModelManager
+      .isModelDownloaded(EntityExtractorOptions.TURKISH);
 
-  // final String model = await entityModelManager.downloadModel();
-  // final bool isModel =
-  //     await entityModelManager.isModelDownloaded();
-  // print(isModel);
-  final entityExtractor = GoogleMlKit.nlp.entityExtractor(language);
+  if (!isModel) {
+    final String model =
+        await entityModelManager.downloadModel(EntityExtractorOptions.TURKISH);
+  }
+
+  final entityExtractor =
+      GoogleMlKit.nlp.entityExtractor(EntityExtractorOptions.TURKISH);
 
   final List<EntityAnnotation> entities =
-      await entityExtractor.extractEntities(dummyText);
+      await entityExtractor.extractEntities(text);
 
-  print("lang: $language, ext: $entities");
+  if (entities != null) {
+    entities.forEach((element) {
+      print(element.text);
+      element.entities.forEach((element) {
+        print(element.toString());
+      });
+    });
+
+    return entities;
+  }
+  return null;
 }
 
 Future getImage(ImageSource imgSource, BuildContext context) async {
-  File _image;
   final picker = ImagePicker();
 
   final pickedFile = await picker.getImage(source: imgSource);
@@ -181,17 +183,12 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
 
     final textDetector = GoogleMlKit.vision.textDetector();
     final recognisedText = await textDetector.processImage(inputImage);
+    print(recognisedText.text);
 
-    // nl
-    // final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
-    // final String response =
-    //     await languageIdentifier.identifyLanguage(recognisedText.text);
-    // final entityExtractor = GoogleMlKit.nlp.entityExtractor(response);
-    // // final entityModelManager = GoogleMlKit.nlp.entityModelManager();
-    // final List<EntityAnnotation> entities =
-    //     await entityExtractor.extractEntities(recognisedText.text);
-
-    // print("lang: $response, ext: $entities");
+    var entities = await extractEntities(recognisedText.text);
+    if (entities != null) {
+      print("ENTITIES WORK");
+    }
 
     for (TextBlock block in recognisedText.blocks) {
       for (TextLine line in block.lines) {
