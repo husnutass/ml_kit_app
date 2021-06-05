@@ -18,7 +18,7 @@ dependencies:
   email_validator: ^2.0.1
   firebase_core: ^1.2.0
   flutter_svg: ^0.22.0
-  google_ml_kit: ^0.4.0
+  google_ml_kit: ^0.6.0
   http: ^0.13.3
   image_picker: ^0.7.5+2
   lottie: ^1.0.1

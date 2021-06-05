@@ -131,8 +131,41 @@ addContact(BuildContext context) async {
   }
 }
 
+Future<List<EntityAnnotation>> extractEntities(String text) async {
+  final entityModelManager = GoogleMlKit.nlp.entityModelManager();
+
+  final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+  final String language = await languageIdentifier.identifyLanguage(text);
+  print(language);
+
+  final bool isModel = await entityModelManager
+      .isModelDownloaded(EntityExtractorOptions.TURKISH);
+
+  if (!isModel) {
+    final String model =
+        await entityModelManager.downloadModel(EntityExtractorOptions.TURKISH);
+  }
+
+  final entityExtractor =
+      GoogleMlKit.nlp.entityExtractor(EntityExtractorOptions.TURKISH);
+
+  final List<EntityAnnotation> entities =
+      await entityExtractor.extractEntities(text);
+
+  if (entities != null) {
+    entities.forEach((element) {
+      print(element.text);
+      element.entities.forEach((element) {
+        print(element.toString());
+      });
+    });
+
+    return entities;
+  }
+  return null;
+}
+
 Future getImage(ImageSource imgSource, BuildContext context) async {
-  File _image;
   final picker = ImagePicker();
 
   final pickedFile = await picker.getImage(source: imgSource);
@@ -150,27 +183,33 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
 
     final textDetector = GoogleMlKit.vision.textDetector();
     final recognisedText = await textDetector.processImage(inputImage);
+    print(recognisedText.text);
 
-    for (TextBlock block in recognisedText.textBlocks) {
-      for (TextLine line in block.textLines) {
-        if (EmailValidator.validate(line.lineText)) {
+    var entities = await extractEntities(recognisedText.text);
+    if (entities != null) {
+      print("ENTITIES WORK");
+    }
+
+    for (TextBlock block in recognisedText.blocks) {
+      for (TextLine line in block.lines) {
+        if (EmailValidator.validate(line.text)) {
           if (email != null) {
-            email.add(line.lineText);
+            email.add(line.text);
           }
-        } else if (getPhoneNumber(line.lineText.replaceAll(' ', '')) != null) {
-          var phoneNumber = getPhoneNumber(line.lineText.replaceAll(' ', ''));
+        } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
+          var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
           if (checkPhoneNumberType(phoneNumber) == "mobile")
             mobilePhone.add(phoneNumber);
           else if (checkPhoneNumberType(phoneNumber) == "business")
             businessPhone.add(phoneNumber);
           phone.add(phoneNumber);
-        } else if (getWebSite(line.lineText) != null) {
+        } else if (getWebSite(line.text) != null) {
           if (site != null) {
-            site.add(getWebSite(line.lineText));
+            site.add(getWebSite(line.text));
           }
         } else {
           if (address != null) {
-            address.add(line.lineText);
+            address.add(line.text);
           }
         }
       }
@@ -186,15 +225,15 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
 Future<http.Response> getName(RecognisedText recognisedText) async {
   var requestData = [];
 
-  for (TextBlock block in recognisedText.textBlocks) {
-    for (TextLine line in block.textLines) {
+  for (TextBlock block in recognisedText.blocks) {
+    for (TextLine line in block.lines) {
       final String lineArea =
-          (line.lineRect.size.width * line.lineRect.size.height).toString();
+          (line.rect.size.width * line.rect.height).toString();
       var ocrData = {
-        "text": line.lineText ?? "",
+        "text": line.text ?? "",
         "boundingBoxArea": lineArea ?? "",
-        "cornerPointsDx": line.linePoints[0]?.dx.toString() ?? "",
-        "cornerPointsDy": line.linePoints[0]?.dy.toString() ?? "",
+        "cornerPointsDx": line.cornerPoints[0]?.dx.toString() ?? "",
+        "cornerPointsDy": line.cornerPoints[0]?.dy.toString() ?? "",
       };
       requestData.add(ocrData);
     }
