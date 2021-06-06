@@ -157,6 +157,7 @@ class InputDrawer {
         );
       },
     );
+    spinner.dismissLoading();
   }
 
   void addListenersToControllers() {

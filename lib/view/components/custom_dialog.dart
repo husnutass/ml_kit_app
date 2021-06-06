@@ -6,19 +6,17 @@ class CustomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        height: MediaQuery.of(context).size.height * .50,
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildSvgPicture(),
-            SizedBox(height: 6),
-            buildMessageText(context),
-          ],
-        ),
+    return Container(
+      color: Colors.black.withOpacity(0.5),
+      //TODO: #14
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset("assets/animations/done.json", fit: BoxFit.fitWidth),
+          SizedBox(height: 6),
+          buildMessageText(context),
+        ],
       ),
     );
   }
@@ -33,8 +31,9 @@ class CustomDialog extends StatelessWidget {
     return Text(
       "Kişi rehbere eklendi",
       style: TextStyle(
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: FontWeight.w500,
+        color: Colors.white,
       ),
       textAlign: TextAlign.center,
     );
