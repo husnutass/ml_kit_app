@@ -169,6 +169,7 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
   final picker = ImagePicker();
 
   final pickedFile = await picker.getImage(source: imgSource);
+  spinner.showLoading();
 
   if (pickedFile != null) {
     email = [];
@@ -219,6 +220,7 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
     // addContact();
   } else {
     print('No image selected.');
+    spinner.dismissLoading();
   }
 }
 

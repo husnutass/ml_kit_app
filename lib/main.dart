@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:ml_kit_app/view/screens/homescreen.dart';
 
 Future<void> main() async {
@@ -29,6 +30,7 @@ class _AppState extends State<App> {
           return HomeScreen();
         },
       ),
+      builder: EasyLoading.init(),
     );
   }
 
