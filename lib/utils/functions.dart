@@ -134,9 +134,9 @@ addContact(BuildContext context) async {
 Future<List<EntityAnnotation>> extractEntities(String text) async {
   final entityModelManager = GoogleMlKit.nlp.entityModelManager();
 
-  final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
-  final String language = await languageIdentifier.identifyLanguage(text);
-  print(language);
+  // final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+  // final String language = await languageIdentifier.identifyLanguage(text);
+  // print(language);
 
   final bool isModel = await entityModelManager
       .isModelDownloaded(EntityExtractorOptions.TURKISH);
@@ -165,6 +165,55 @@ Future<List<EntityAnnotation>> extractEntities(String text) async {
   return null;
 }
 
+Future<RecognisedText> extractEntities2(RecognisedText recognisedText) async {
+  final entityModelManager = GoogleMlKit.nlp.entityModelManager();
+
+  // final languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+  // final String language = await languageIdentifier.identifyLanguage(text);
+  // print(language);
+
+  final bool isModel = await entityModelManager
+      .isModelDownloaded(EntityExtractorOptions.TURKISH);
+
+  if (!isModel) {
+    final String model =
+        await entityModelManager.downloadModel(EntityExtractorOptions.TURKISH);
+  }
+
+  final entityExtractor =
+      GoogleMlKit.nlp.entityExtractor(EntityExtractorOptions.TURKISH);
+
+  List<TextLine> addressFoundLines = [];
+
+  for (var i = 0; i < recognisedText.blocks.length; i++) {
+    TextBlock block = recognisedText.blocks[i];
+    for (var j = 0; j < block.lines.length; j++) {
+      TextLine line = block.lines[j];
+      String text = line.text;
+
+      final List<EntityAnnotation> entityAnnotations =
+          await entityExtractor.extractEntities(text);
+
+      entityAnnotationLoop:
+      for (var entityAnnotation in entityAnnotations) {
+        for (var entity in entityAnnotation.entities) {
+          if (entity.runtimeType == AddressEntity) {
+            addressFoundLines.add(recognisedText.blocks[i].lines[j]);
+            break entityAnnotationLoop;
+          }
+        }
+      }
+    }
+    if (addressFoundLines.length > 0) {
+      for (var addressFoundLine in addressFoundLines) {
+        recognisedText.blocks[i].lines.remove(addressFoundLine);
+      }
+      addressFoundLines.clear();
+    }
+  }
+  return recognisedText;
+}
+
 Future getImage(ImageSource imgSource, BuildContext context) async {
   final picker = ImagePicker();
 
@@ -184,33 +233,37 @@ Future getImage(ImageSource imgSource, BuildContext context) async {
 
     final textDetector = GoogleMlKit.vision.textDetector();
     final recognisedText = await textDetector.processImage(inputImage);
-    print(recognisedText.text);
+    print("recognizedText: " + recognisedText.text);
 
-    var entities = await extractEntities(recognisedText.text);
-    if (entities != null) {
-      print("ENTITIES WORK");
-    }
+    // var entities = await extractEntities(recognisedText.text);
+    // if (entities != null) {
+    //   print("ENTITIES WORK");
+    // }
 
-    for (TextBlock block in recognisedText.blocks) {
+    var extractedRecognizedText = await extractEntities2(recognisedText);
+
+    for (TextBlock block in extractedRecognizedText.blocks) {
       for (TextLine line in block.lines) {
-        if (EmailValidator.validate(line.text)) {
-          if (email != null) {
-            email.add(line.text);
-          }
-        } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
-          var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
-          if (checkPhoneNumberType(phoneNumber) == "mobile")
-            mobilePhone.add(phoneNumber);
-          else if (checkPhoneNumberType(phoneNumber) == "business")
-            businessPhone.add(phoneNumber);
-          phone.add(phoneNumber);
-        } else if (getWebSite(line.text) != null) {
-          if (site != null) {
-            site.add(getWebSite(line.text));
-          }
-        } else {
-          if (address != null) {
-            address.add(line.text);
+        if (line != null) {
+          if (EmailValidator.validate(line.text)) {
+            if (email != null) {
+              email.add(line.text);
+            }
+          } else if (getPhoneNumber(line.text.replaceAll(' ', '')) != null) {
+            var phoneNumber = getPhoneNumber(line.text.replaceAll(' ', ''));
+            if (checkPhoneNumberType(phoneNumber) == "mobile")
+              mobilePhone.add(phoneNumber);
+            else if (checkPhoneNumberType(phoneNumber) == "business")
+              businessPhone.add(phoneNumber);
+            phone.add(phoneNumber);
+          } else if (getWebSite(line.text) != null) {
+            if (site != null) {
+              site.add(getWebSite(line.text));
+            }
+          } else {
+            if (address != null) {
+              address.add(line.text);
+            }
           }
         }
       }
