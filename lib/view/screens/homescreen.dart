@@ -60,26 +60,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   RichText buildDescriptionText() {
+    const homeText_tr = const <TextSpan>[
+      TextSpan(text: 'Kartvizitleri '),
+      TextSpan(text: 'Kamera', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: 'dan Tarayın veya Telefonunuzun '),
+      TextSpan(text: 'Galeri', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: 'sinden Seçin ve '),
+      TextSpan(text: 'Rehber', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: 'inize Ekleyin.'),
+    ];
+
+    const homeText_en = const <TextSpan>[
+      TextSpan(text: 'Scan Business Cards From '),
+      TextSpan(text: 'Camera ', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: 'or Select From Your Phone\'s '),
+      TextSpan(text: 'Gallery ', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: 'and Add to Your '),
+      TextSpan(text: 'Contacts', style: TextStyle(fontWeight: FontWeight.bold)),
+      TextSpan(text: '.'),
+    ];
+
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
-        text: 'Scan Business Cards From ',
         style: TextStyle(
           color: Colors.white,
           fontSize: 18,
           height: 1.3,
         ),
-        children: const <TextSpan>[
-          TextSpan(
-              text: 'Camera ', style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: 'or Select From Your Phone\'s '),
-          TextSpan(
-              text: 'Gallery ', style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: 'and Add to Your '),
-          TextSpan(
-              text: 'Contacts', style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: '.'),
-        ],
+        children: homeText_tr,
       ),
     );
   }
